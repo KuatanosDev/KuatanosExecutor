@@ -1,1 +1,198 @@
+-- Создание ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KuatanosExecutor"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
+-- Создание основного окна
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 600, 0, 400)
+mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+mainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+mainFrame.BorderSizePixel = 0
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.Parent = screenGui
+
+-- Создание заголовка
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Text = "KuatanosExecutor"
+titleLabel.Size = UDim2.new(0, 200, 0, 40)
+titleLabel.Position = UDim2.new(0, 10, 0, 10)
+titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextSize = 20
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = mainFrame
+
+-- Кнопка "X" (закрыть окно)
+local closeButton = Instance.new("TextButton")
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(1, -50, 0, 10)
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.BackgroundColor3 = Color3.new(0, 0, 0)
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 20
+closeButton.Parent = mainFrame
+
+-- Маленькая кнопка для открытия окна (размер 50x50)
+local smallButton = Instance.new("TextButton")
+smallButton.Text = "K"
+smallButton.Size = UDim2.new(0, 50, 0, 50)
+smallButton.Position = mainFrame.Position  -- Изначально на том же месте, что и окно
+smallButton.TextColor3 = Color3.new(1, 1, 1)
+smallButton.BackgroundColor3 = Color3.new(0, 0, 0)
+smallButton.Font = Enum.Font.SourceSansBold
+smallButton.TextSize = 20
+smallButton.Visible = false
+smallButton.Parent = screenGui
+
+-- Хранение позиции окна
+local lastPosition = mainFrame.Position
+
+-- Закрытие окна
+closeButton.MouseButton1Click:Connect(function()
+    lastPosition = mainFrame.Position  -- Сохраняем позицию перед скрытием
+    mainFrame.Visible = false
+    smallButton.Visible = true
+end)
+
+-- Открытие окна обратно в сохранённой позиции
+smallButton.MouseButton1Click:Connect(function()
+    mainFrame.Position = lastPosition  -- Восстанавливаем сохранённую позицию
+    mainFrame.Visible = true
+    smallButton.Visible = false
+end)
+
+-- Перетаскивание окна
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+    end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+mainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Перетаскивание маленькой кнопки
+local smallButtonDragging = false
+local smallButtonDragStart = nil
+local smallButtonStartPos = nil
+
+smallButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        smallButtonDragging = true
+        smallButtonDragStart = input.Position
+        smallButtonStartPos = smallButton.Position
+    end
+end)
+
+smallButton.InputChanged:Connect(function(input)
+    if smallButtonDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - smallButtonDragStart
+        smallButton.Position = UDim2.new(
+            smallButtonStartPos.X.Scale,
+            smallButtonStartPos.X.Offset + delta.X,
+            smallButtonStartPos.Y.Scale,
+            smallButtonStartPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+smallButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        smallButtonDragging = false
+    end
+end)
+
+-- Создание текстового поля (TextBox) с прокруткой
+local textBoxFrame = Instance.new("ScrollingFrame")
+textBoxFrame.Size = UDim2.new(0, 480, 0, 300)  -- Размер для текстового поля
+textBoxFrame.Position = UDim2.new(0, 10, 0, 60)
+textBoxFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)  -- Серый фон
+textBoxFrame.BorderSizePixel = 0
+textBoxFrame.ScrollBarThickness = 10  -- Толщина полосы прокрутки
+textBoxFrame.CanvasSize = UDim2.new(0, 0, 2, 0)  -- Размер содержимого, если нужно больше, можно увеличить
+textBoxFrame.Parent = mainFrame
+
+local textBox = Instance.new("TextBox")
+textBox.Size = UDim2.new(1, -20, 1, -20)  -- Текстовое поле заполняет контейнер
+textBox.Position = UDim2.new(0, 10, 0, 10)
+textBox.TextColor3 = Color3.new(1, 1, 1)
+textBox.BackgroundColor3 = Color3.new(0, 0, 0)
+textBox.Font = Enum.Font.SourceSans
+textBox.TextSize = 18
+textBox.ClearTextOnFocus = false  -- Не очищать текст при фокусе
+textBox.TextXAlignment = Enum.TextXAlignment.Left
+textBox.TextYAlignment = Enum.TextYAlignment.Top
+textBox.TextWrapped = false  -- Отключить автоматический перенос строк
+textBox.MultiLine = true  -- Разрешить несколько строк
+textBox.Parent = textBoxFrame
+
+-- Создание кнопки Execute
+local executeButton = Instance.new("TextButton")
+executeButton.Text = "Execute"
+executeButton.Size = UDim2.new(0, 100, 0, 40)
+executeButton.Position = UDim2.new(0, 500, 0, 60)  -- Рядом с TextBox
+executeButton.TextColor3 = Color3.new(1, 1, 1)
+executeButton.BackgroundColor3 = Color3.new(0, 0, 0)
+executeButton.Font = Enum.Font.SourceSansBold
+executeButton.TextSize = 20
+executeButton.Parent = mainFrame
+
+-- Создание кнопки Clear
+local clearButton = Instance.new("TextButton")
+clearButton.Text = "Clear"
+clearButton.Size = UDim2.new(0, 100, 0, 40)
+clearButton.Position = UDim2.new(0, 500, 0, 110)  -- Под кнопкой Execute
+clearButton.TextColor3 = Color3.new(1, 1, 1)
+clearButton.BackgroundColor3 = Color3.new(0, 0, 0)
+clearButton.Font = Enum.Font.SourceSansBold
+clearButton.TextSize = 20
+clearButton.Parent = mainFrame
+
+-- Логика выполнения скрипта
+executeButton.MouseButton1Click:Connect(function()
+    local scriptToRun = textBox.Text
+    if scriptToRun ~= "" then
+        -- Попытка выполнить скрипт
+        local success, result = pcall(function()
+            loadstring(scriptToRun)()
+        end)
+        
+        if not success then
+            print("Ошибка при выполнении скрипта: " .. result)
+        else
+            print("Скрипт выполнен успешно!")
+        end
+    else
+        print("Текстовое поле пустое!")
+    end
+end)
+
+-- Логика очистки скрипта
+clearButton.MouseButton1Click:Connect(function()
+    textBox.Text = ""
+end)
