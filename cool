@@ -40,7 +40,7 @@ closeButton.Parent = mainFrame
 local smallButton = Instance.new("TextButton")
 smallButton.Text = "K"
 smallButton.Size = UDim2.new(0, 50, 0, 50)
-smallButton.Position = mainFrame.Position  -- Изначально на том же месте, что и окно
+smallButton.Position = mainFrame.Position -- Изначально на том же месте, что и окно
 smallButton.TextColor3 = Color3.new(1, 1, 1)
 smallButton.BackgroundColor3 = Color3.new(0, 0, 0)
 smallButton.Font = Enum.Font.SourceSansBold
@@ -51,18 +51,35 @@ smallButton.Parent = screenGui
 -- Хранение позиции окна
 local lastPosition = mainFrame.Position
 
--- Закрытие окна
-closeButton.MouseButton1Click:Connect(function()
-    lastPosition = mainFrame.Position  -- Сохраняем позицию перед скрытием
+-- Функция для сворачивания окна
+local function minimizeWindow()
+    lastPosition = mainFrame.Position -- Сохраняем позицию перед скрытием
     mainFrame.Visible = false
     smallButton.Visible = true
-end)
+end
 
--- Открытие окна обратно в сохранённой позиции
-smallButton.MouseButton1Click:Connect(function()
-    mainFrame.Position = lastPosition  -- Восстанавливаем сохранённую позицию
+-- Функция для разворачивания окна
+local function maximizeWindow()
+    mainFrame.Position = lastPosition -- Восстанавливаем сохранённую позицию
     mainFrame.Visible = true
     smallButton.Visible = false
+end
+
+-- Закрытие окна
+closeButton.MouseButton1Click:Connect(minimizeWindow)
+
+-- Открытие окна обратно в сохранённой позиции
+smallButton.MouseButton1Click:Connect(maximizeWindow)
+
+-- Обработка нажатия клавиши B
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.B then
+        if mainFrame.Visible then
+            minimizeWindow()
+        else
+            maximizeWindow()
+        end
+    end
 end)
 
 -- Перетаскивание окна
@@ -129,33 +146,33 @@ end)
 
 -- Создание текстового поля (TextBox) с прокруткой
 local textBoxFrame = Instance.new("ScrollingFrame")
-textBoxFrame.Size = UDim2.new(0, 480, 0, 300)  -- Размер для текстового поля
+textBoxFrame.Size = UDim2.new(0, 480, 0, 300)
 textBoxFrame.Position = UDim2.new(0, 10, 0, 60)
-textBoxFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)  -- Серый фон
+textBoxFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
 textBoxFrame.BorderSizePixel = 0
-textBoxFrame.ScrollBarThickness = 10  -- Толщина полосы прокрутки
-textBoxFrame.CanvasSize = UDim2.new(0, 0, 2, 0)  -- Размер содержимого, если нужно больше, можно увеличить
+textBoxFrame.ScrollBarThickness = 10
+textBoxFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
 textBoxFrame.Parent = mainFrame
 
 local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(1, -20, 1, -20)  -- Текстовое поле заполняет контейнер
+textBox.Size = UDim2.new(1, -20, 1, -20)
 textBox.Position = UDim2.new(0, 10, 0, 10)
 textBox.TextColor3 = Color3.new(1, 1, 1)
 textBox.BackgroundColor3 = Color3.new(0, 0, 0)
 textBox.Font = Enum.Font.SourceSans
 textBox.TextSize = 18
-textBox.ClearTextOnFocus = false  -- Не очищать текст при фокусе
+textBox.ClearTextOnFocus = false
 textBox.TextXAlignment = Enum.TextXAlignment.Left
 textBox.TextYAlignment = Enum.TextYAlignment.Top
-textBox.TextWrapped = false  -- Отключить автоматический перенос строк
-textBox.MultiLine = true  -- Разрешить несколько строк
+textBox.TextWrapped = false
+textBox.MultiLine = true
 textBox.Parent = textBoxFrame
 
 -- Создание кнопки Execute
 local executeButton = Instance.new("TextButton")
 executeButton.Text = "Execute"
 executeButton.Size = UDim2.new(0, 100, 0, 40)
-executeButton.Position = UDim2.new(0, 500, 0, 60)  -- Рядом с TextBox
+executeButton.Position = UDim2.new(0, 500, 0, 60)
 executeButton.TextColor3 = Color3.new(1, 1, 1)
 executeButton.BackgroundColor3 = Color3.new(0, 0, 0)
 executeButton.Font = Enum.Font.SourceSansBold
@@ -166,7 +183,7 @@ executeButton.Parent = mainFrame
 local clearButton = Instance.new("TextButton")
 clearButton.Text = "Clear"
 clearButton.Size = UDim2.new(0, 100, 0, 40)
-clearButton.Position = UDim2.new(0, 500, 0, 110)  -- Под кнопкой Execute
+clearButton.Position = UDim2.new(0, 500, 0, 110)
 clearButton.TextColor3 = Color3.new(1, 1, 1)
 clearButton.BackgroundColor3 = Color3.new(0, 0, 0)
 clearButton.Font = Enum.Font.SourceSansBold
@@ -177,11 +194,9 @@ clearButton.Parent = mainFrame
 executeButton.MouseButton1Click:Connect(function()
     local scriptToRun = textBox.Text
     if scriptToRun ~= "" then
-        -- Попытка выполнить скрипт
         local success, result = pcall(function()
             loadstring(scriptToRun)()
         end)
-        
         if not success then
             print("Ошибка при выполнении скрипта: " .. result)
         else
